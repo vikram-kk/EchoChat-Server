@@ -29,10 +29,17 @@ io.on("connection", (socket) => {
     })
     console.log("User connected:", socket.id);
 
-    socket.on("sendMessage", (data) => {
-        console.log("Message received:", data);
+    socket.on("joinRoom", ({ user1, user2 }) => {
+        const roomId = [user1, user2].sort().join("_");
+        socket.join(roomId)
+        console.log(`${user1} is connected in ${roomId}`)
+    })
 
-        io.emit("receiveMessage", data);
+
+    socket.on("sendMessage", ({ sender, receiver, message }) => {
+        console.log("Message received:", message);
+        const roomId = [sender, receiver].sort().join("_")
+        io.to(roomId).emit("receiveMessage", { sender, message });
     });
 
     socket.on("disconnect", () => {
