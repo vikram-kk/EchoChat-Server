@@ -38,6 +38,12 @@ io.on("connection", (socket) => {
         const messages = await Message.find({ roomId }).sort({ createdAt: 1 })
         socket.emit("chatHistory", messages)
     })
+    socket.on("typing", ({ sender, receiver }) => {
+        const roomId = [sender, receiver].sort().join("_");
+
+        socket.to(roomId).emit("userTyping", { sender });
+
+    })
 
 
     socket.on("sendMessage", async ({ sender, receiver, message }) => {
@@ -49,7 +55,7 @@ io.on("connection", (socket) => {
             message,
             roomId
         }); await newMessage.save()
-        io.to(roomId).emit("receiveMessage", { sender, message });
+        io.to(roomId).emit("receiveMessage", newMessage);
     });
 
     socket.on("disconnect", () => {
