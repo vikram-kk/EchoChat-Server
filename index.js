@@ -45,7 +45,9 @@ io.on("connection", (socket) => {
 
     })
     socket.on("markAsSeen", async ({ sender, receiver }) => {
+        console.log("BACKEND: markAsSeen received", sender, receiver);
         const roomId = [sender, receiver].sort().join("_")
+        console.log("Seen emitted for:", sender, receiver)
         const data = await Message.updateMany({
             roomId,
             sender: sender, // messages from OTHER user
@@ -56,7 +58,7 @@ io.on("connection", (socket) => {
         })
 
         socket.to(roomId).emit("messageSeen", {
-            sender: receiver
+            sender: sender
         })
 
         console.log(data)
@@ -70,7 +72,8 @@ io.on("connection", (socket) => {
             sender,
             receiver,
             message,
-            roomId
+            roomId,
+            status: "sent"
         }); await newMessage.save()
         io.to(roomId).emit("receiveMessage", newMessage);
     });
